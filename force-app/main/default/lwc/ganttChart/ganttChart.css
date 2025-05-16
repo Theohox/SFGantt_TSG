@@ -1,4 +1,5 @@
-:host {
+/* Host-level custom properties */
+.c-gantt-chart {
     --gantt-row-height: 40px;
     --gantt-header-height: 50px;
     --gantt-label-width: 200px;
@@ -167,8 +168,9 @@
     border-radius: 4px;
 }
 
+/* Media Queries */
 @media (max-width: 768px) {
-    :host {
+    .c-gantt-chart {
         --gantt-label-width: 150px;
     }
 }
