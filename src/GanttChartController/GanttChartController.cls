@@ -146,7 +146,7 @@ public with sharing class GanttChartController {
     @AuraEnabled
     public static String saveConfiguration(String configStr) {
         try {
-            GanttChartConfiguration__c config = new GanttChartConfiguration__c(
+            Gantt_Chart_Configuration__c config = new Gantt_Chart_Configuration__c(
                 Name = 'Gantt Configuration',
                 Configuration__c = configStr,
                 OwnerId = UserInfo.getUserId()
@@ -165,9 +165,9 @@ public with sharing class GanttChartController {
         try {
             List<ConfigInfo> configs = new List<ConfigInfo>();
             
-            for (GanttChartConfiguration__c config : [
+            for (Gantt_Chart_Configuration__c config : [
                 SELECT Id, Name, Configuration__c, CreatedDate
-                FROM GanttChartConfiguration__c
+                FROM Gantt_Chart_Configuration__c
                 WHERE OwnerId = :UserInfo.getUserId()
                 ORDER BY CreatedDate DESC
             ]) {
