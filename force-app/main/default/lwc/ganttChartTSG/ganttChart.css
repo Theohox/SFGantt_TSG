@@ -52,7 +52,7 @@
     border-radius: var(--lwc-borderRadiusMedium);
     color: var(--lwc-colorTextInverse);
     padding: 0 var(--lwc-spacingXSmall);
-    font-size: var(--lwc-fontSizeSmall);
+    font-size: var(--lwc-fontSizeSmall); /* best practice */
     line-height: 24px;
     white-space: nowrap;
     overflow: hidden;
