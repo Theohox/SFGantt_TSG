@@ -286,11 +286,145 @@ export default class GanttChart extends NavigationMixin(LightningElement) {
     }
     
     generateTimeline() {
-        // Implementation for timeline generation
+        const header = this.template.querySelector('.gantt-timeline-header');
+        if (!header) return;
+
+        const timelineUnits = [];
+        const startDate = new Date(this.viewStartDate);
+        const endDate = new Date(this.viewEndDate);
+        
+        switch (this.zoom) {
+            case 'day':
+                this.generateDailyTimeline(startDate, endDate, timelineUnits);
+                break;
+            case 'week':
+                this.generateWeeklyTimeline(startDate, endDate, timelineUnits);
+                break;
+            case 'month':
+                this.generateMonthlyTimeline(startDate, endDate, timelineUnits);
+                break;
+            case 'quarter':
+                this.generateQuarterlyTimeline(startDate, endDate, timelineUnits);
+                break;
+            case 'year':
+                this.generateYearlyTimeline(startDate, endDate, timelineUnits);
+                break;
+            default:
+                this.generateMonthlyTimeline(startDate, endDate, timelineUnits);
+        }
+
+        this.timelineUnits = timelineUnits;
     }
-    
+
+    generateDailyTimeline(start, end, units) {
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const current = new Date(start);
+
+        while (current <= end) {
+            const isWeekend = current.getDay() === 0 || current.getDay() === 6;
+            units.push({
+                id: current.toISOString(),
+                label: `${days[current.getDay()]} ${current.getDate()}`,
+                className: `gantt-timeline-unit${isWeekend ? ' weekend' : ''}`
+            });
+            current.setDate(current.getDate() + 1);
+        }
+    }
+
+    generateWeeklyTimeline(start, end, units) {
+        const current = new Date(start);
+        current.setDate(current.getDate() - current.getDay()); // Start from Sunday
+
+        while (current <= end) {
+            const weekEnd = new Date(current);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            
+            units.push({
+                id: current.toISOString(),
+                label: `Week ${this.getWeekNumber(current)}`,
+                className: 'gantt-timeline-unit'
+            });
+            
+            current.setDate(current.getDate() + 7);
+        }
+    }
+
+    generateMonthlyTimeline(start, end, units) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const current = new Date(start);
+        current.setDate(1);
+
+        while (current <= end) {
+            units.push({
+                id: current.toISOString(),
+                label: `${months[current.getMonth()]} ${current.getFullYear()}`,
+                className: 'gantt-timeline-unit'
+            });
+            
+            current.setMonth(current.getMonth() + 1);
+        }
+    }
+
+    generateQuarterlyTimeline(start, end, units) {
+        const current = new Date(start);
+        current.setMonth(Math.floor(current.getMonth() / 3) * 3);
+        current.setDate(1);
+
+        while (current <= end) {
+            const quarter = Math.floor(current.getMonth() / 3) + 1;
+            units.push({
+                id: current.toISOString(),
+                label: `Q${quarter} ${current.getFullYear()}`,
+                className: 'gantt-timeline-unit'
+            });
+            
+            current.setMonth(current.getMonth() + 3);
+        }
+    }
+
+    generateYearlyTimeline(start, end, units) {
+        const current = new Date(start);
+        current.setMonth(0);
+        current.setDate(1);
+
+        while (current <= end) {
+            units.push({
+                id: current.toISOString(),
+                label: current.getFullYear().toString(),
+                className: 'gantt-timeline-unit'
+            });
+            
+            current.setFullYear(current.getFullYear() + 1);
+        }
+    }
+
+    getWeekNumber(date) {
+        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+        const days = Math.floor((date - firstDayOfYear) / (24 * 60 * 60 * 1000));
+        return Math.ceil((days + firstDayOfYear.getDay() + 1) / 7);
+    }
+
     renderGanttBar(record) {
-        // Implementation for rendering Gantt bars
+        const container = this.template.querySelector('.gantt-chart-container');
+        if (!container) return;
+
+        const totalWidth = container.offsetWidth - this.ganttLabelWidth;
+        const timeRange = this.viewEndDate - this.viewStartDate;
+        
+        const startPosition = ((record.start - this.viewStartDate) / timeRange) * totalWidth;
+        const width = ((record.end - record.start) / timeRange) * totalWidth;
+        
+        const bar = document.createElement('div');
+        bar.className = 'gantt-bar';
+        bar.style.left = `${startPosition}px`;
+        bar.style.width = `${width}px`;
+        bar.style.backgroundColor = record.color || 'var(--gantt-bar-color)';
+        bar.dataset.id = record.id;
+        bar.textContent = record.title;
+        
+        bar.addEventListener('click', this.handleRecordClick.bind(this));
+        
+        container.appendChild(bar);
     }
     
     handleZoomChange(event) {
