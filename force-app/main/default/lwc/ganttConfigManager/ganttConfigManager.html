@@ -1,0 +1,112 @@
+<template>
+    <lightning-card title="Gantt Chart Configuration Manager" icon-name="custom:custom67">
+        <div class="slds-p-around_medium">
+            <!-- Configuration List -->
+            <div class="slds-grid slds-gutters">
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="slds-box slds-box_x-small slds-m-bottom_medium">
+                        <lightning-button 
+                            label="New Configuration" 
+                            variant="brand" 
+                            onclick={handleNewConfig}
+                            class="slds-m-bottom_small">
+                        </lightning-button>
+                        
+                        <ul class="slds-has-dividers_around-space">
+                            <template for:each={configurations} for:item="config">
+                                <li key={config.id} class="slds-item">
+                                    <a href="javascript:void(0);" 
+                                       onclick={handleConfigSelect}
+                                       data-id={config.id}
+                                       class={config.className}>
+                                        {config.name}
+                                    </a>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Configuration Form -->
+                <div class="slds-col slds-size_2-of-3">
+                    <template if:true={selectedConfig}>
+                        <div class="slds-box slds-box_x-small">
+                            <lightning-input 
+                                label="Configuration Name"
+                                value={selectedConfig.name}
+                                onchange={handleNameChange}>
+                            </lightning-input>
+                            
+                            <lightning-combobox
+                                label="Select Object"
+                                value={selectedConfig.objectApiName}
+                                options={objectOptions}
+                                onchange={handleObjectChange}
+                                class="slds-m-top_small">
+                            </lightning-combobox>
+                            
+                            <template if:true={hasObjectSelected}>
+                                <div class="slds-grid slds-gutters slds-m-top_small">
+                                    <div class="slds-col">
+                                        <lightning-combobox
+                                            label="Start Date Field"
+                                            value={selectedConfig.startDateField}
+                                            options={dateFieldOptions}
+                                            onchange={handleStartFieldChange}>
+                                        </lightning-combobox>
+                                    </div>
+                                    <div class="slds-col">
+                                        <lightning-combobox
+                                            label="End Date Field"
+                                            value={selectedConfig.endDateField}
+                                            options={dateFieldOptions}
+                                            onchange={handleEndFieldChange}>
+                                        </lightning-combobox>
+                                    </div>
+                                </div>
+                                
+                                <lightning-combobox
+                                    label="Label Field"
+                                    value={selectedConfig.labelField}
+                                    options={textFieldOptions}
+                                    onchange={handleLabelFieldChange}
+                                    class="slds-m-top_small">
+                                </lightning-combobox>
+                                
+                                <lightning-combobox
+                                    label="Parent Field (Optional)"
+                                    value={selectedConfig.parentField}
+                                    options={referenceFieldOptions}
+                                    onchange={handleParentFieldChange}
+                                    class="slds-m-top_small">
+                                </lightning-combobox>
+                                
+                                <lightning-combobox
+                                    label="Color Field (Optional)"
+                                    value={selectedConfig.colorField}
+                                    options={colorFieldOptions}
+                                    onchange={handleColorFieldChange}
+                                    class="slds-m-top_small">
+                                </lightning-combobox>
+                            </template>
+                            
+                            <div class="slds-m-top_medium slds-text-align_right">
+                                <lightning-button-group>
+                                    <lightning-button 
+                                        label="Cancel" 
+                                        onclick={handleCancel}>
+                                    </lightning-button>
+                                    <lightning-button 
+                                        label="Save" 
+                                        variant="brand" 
+                                        onclick={handleSave}>
+                                    </lightning-button>
+                                </lightning-button-group>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+</template>
