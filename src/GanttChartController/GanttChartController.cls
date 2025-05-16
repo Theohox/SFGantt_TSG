@@ -4,20 +4,16 @@ public with sharing class GanttChartController {
     public static List<ObjectInfo> getObjects(String contextObjectName, Id recordId) {
         List<ObjectInfo> objects = new List<ObjectInfo>();
         
-        // Get standard and custom object info
         Map<String, Schema.SObjectType> globalDescribe = Schema.getGlobalDescribe();
         
-        // Get relationships for context object if provided
         Set<String> relatedObjects = new Set<String>();
         if (String.isNotBlank(contextObjectName)) {
             Schema.DescribeSObjectResult contextObj = globalDescribe.get(contextObjectName).getDescribe();
             
-            // Get child relationships
             for (Schema.ChildRelationship rel : contextObj.getChildRelationships()) {
                 relatedObjects.add(rel.getChildSObject().getDescribe().getName());
             }
             
-            // Get parent relationships
             for (Schema.SObjectField field : contextObj.fields.getMap().values()) {
                 Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
                 if (fieldDescribe.getType() == Schema.DisplayType.REFERENCE) {
@@ -31,9 +27,6 @@ public with sharing class GanttChartController {
         for (String objName : globalDescribe.keySet()) {
             Schema.DescribeSObjectResult objDescribe = globalDescribe.get(objName).getDescribe();
             
-            // Include if:
-            // 1. Object is accessible and queryable
-            // 2. Either no context object (showing all) OR object is related to context
             if (objDescribe.isAccessible() && objDescribe.isQueryable() && 
                 (String.isBlank(contextObjectName) || relatedObjects.contains(objName))) {
                 objects.add(new ObjectInfo(
@@ -62,7 +55,6 @@ public with sharing class GanttChartController {
                 Schema.DescribeFieldResult fieldDescribe = fieldMap.get(fieldName).getDescribe();
                 
                 if (fieldDescribe.isAccessible()) {
-                    // Only include Date fields for date selection
                     if (fieldDescribe.getType() == Schema.DisplayType.DATE) {
                         fields.add(new FieldInfo(
                             fieldDescribe.getLabel(),
@@ -101,7 +93,6 @@ public with sharing class GanttChartController {
             
             List<String> whereConditions = new List<String>();
             
-            // Add date range conditions
             if (startDate != null && endDate != null) {
                 whereConditions.add('(' +
                     startDateField + ' >= :startDate AND ' + 
@@ -115,7 +106,6 @@ public with sharing class GanttChartController {
                 ')');
             }
             
-            // Add context record filter if applicable
             if (String.isNotBlank(contextObjectName) && contextRecordId != null) {
                 String relationshipField = getRelationshipField(objectApiName, contextObjectName);
                 if (String.isNotBlank(relationshipField)) {
@@ -139,7 +129,6 @@ public with sharing class GanttChartController {
     private static String getRelationshipField(String childObject, String parentObject) {
         Schema.DescribeSObjectResult childDescribe = Schema.getGlobalDescribe().get(childObject).getDescribe();
         
-        // Check for direct lookup/master-detail relationship
         for (Schema.SObjectField field : childDescribe.fields.getMap().values()) {
             Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
             if (fieldDescribe.getType() == Schema.DisplayType.REFERENCE) {
@@ -157,13 +146,16 @@ public with sharing class GanttChartController {
     @AuraEnabled
     public static String saveConfiguration(String configStr) {
         try {
-            GanttChartConfiguration__c config = new GanttChartConfiguration__c(
+            List<Gantt_Chart_Configuration__c> configsToInsert = new List<Gantt_Chart_Configuration__c>();
+            
+            Gantt_Chart_Configuration__c config = new Gantt_Chart_Configuration__c(
                 Name = 'Gantt Configuration',
                 Configuration__c = configStr,
                 OwnerId = UserInfo.getUserId()
             );
             
-            insert config;
+            configsToInsert.add(config);
+            insert configsToInsert;
             return config.Id;
         } 
         catch (Exception e) {
@@ -176,12 +168,14 @@ public with sharing class GanttChartController {
         try {
             List<ConfigInfo> configs = new List<ConfigInfo>();
             
-            for (GanttChartConfiguration__c config : [
+            List<Gantt_Chart_Configuration__c> savedConfigs = [
                 SELECT Id, Name, Configuration__c, CreatedDate
-                FROM GanttChartConfiguration__c
+                FROM Gantt_Chart_Configuration__c
                 WHERE OwnerId = :UserInfo.getUserId()
                 ORDER BY CreatedDate DESC
-            ]) {
+            ];
+            
+            for (Gantt_Chart_Configuration__c config : savedConfigs) {
                 configs.add(new ConfigInfo(
                     config.Id,
                     config.Name,
