@@ -1,4 +1,3 @@
-/* Host-level custom properties */
 .c-gantt-chart {
     --gantt-row-height: 40px;
     --gantt-header-height: 50px;
@@ -168,7 +167,6 @@
     border-radius: 4px;
 }
 
-/* Media Queries */
 @media (max-width: 768px) {
     .c-gantt-chart {
         --gantt-label-width: 150px;
