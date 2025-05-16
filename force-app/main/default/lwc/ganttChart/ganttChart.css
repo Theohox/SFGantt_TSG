@@ -13,12 +13,12 @@
     --gantt-today-color: rgba(255, 0, 0, 0.1);
 }
 
-.gantt-chart-wrapper {
+:host .gantt-chart-wrapper {
     position: relative;
     overflow: hidden;
 }
 
-.gantt-container {
+:host .gantt-container {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -27,7 +27,7 @@
     border-radius: 0.25rem;
 }
 
-.gantt-timeline-header {
+:host .gantt-timeline-header {
     height: var(--gantt-header-height);
     min-height: var(--gantt-header-height);
     background-color: #F3F2F2;
@@ -38,24 +38,24 @@
     display: flex;
 }
 
-.gantt-chart-container {
+:host .gantt-chart-container {
     flex: 1;
     position: relative;
     overflow-y: auto;
 }
 
-.gantt-row {
+:host .gantt-row {
     display: flex;
     height: var(--gantt-row-height);
     border-bottom: 1px solid var(--gantt-grid-color);
     position: relative;
 }
 
-.gantt-row:hover {
+:host .gantt-row:hover {
     background-color: #F3F2F2;
 }
 
-.gantt-label {
+:host .gantt-label {
     width: var(--gantt-label-width);
     min-width: var(--gantt-label-width);
     padding: 0 10px;
@@ -71,12 +71,12 @@
     white-space: nowrap;
 }
 
-.gantt-bar-container {
+:host .gantt-bar-container {
     flex: 1;
     position: relative;
 }
 
-.gantt-bar {
+:host .gantt-bar {
     position: absolute;
     height: 20px;
     margin-top: 10px;
@@ -95,12 +95,12 @@
     transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-.gantt-bar:hover {
+:host .gantt-bar:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
 
-.gantt-milestone {
+:host .gantt-milestone {
     height: 20px;
     width: 20px;
     margin-top: 10px;
@@ -109,7 +109,7 @@
     position: absolute;
 }
 
-.gantt-today-line {
+:host .gantt-today-line {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -118,7 +118,7 @@
     z-index: 4;
 }
 
-.gantt-timeline-unit {
+:host .gantt-timeline-unit {
     flex: 1;
     min-width: 50px;
     text-align: center;
@@ -130,11 +130,11 @@
     font-size: 12px;
 }
 
-.gantt-timeline-unit.weekend {
+:host .gantt-timeline-unit.weekend {
     background-color: rgba(0, 0, 0, 0.03);
 }
 
-.gantt-grid-column {
+:host .gantt-grid-column {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -143,7 +143,7 @@
     z-index: 3;
 }
 
-.gantt-tooltip {
+:host .gantt-tooltip {
     position: absolute;
     background-color: #FFFFFF;
     border: 1px solid #DDDBDA;
@@ -155,12 +155,12 @@
     max-width: 300px;
 }
 
-.configuration-panel {
+:host .configuration-panel {
     transition: max-height 0.3s ease;
     overflow: hidden;
 }
 
-.gantt-controls {
+:host .gantt-controls {
     background-color: #FFFFFF;
     padding: 8px;
     border: 1px solid var(--gantt-grid-color);
