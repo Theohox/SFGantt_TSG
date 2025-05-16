@@ -36,13 +36,77 @@ The component can be used in various Salesforce contexts:
 - Salesforce org with Lightning Experience enabled
 - API version 59.0 or later
 
+### Creating the Custom Object
+
+1. From Setup, navigate to Object Manager:
+   - Click "Create" → "Custom Object"
+   - Label: Gantt Chart Configuration
+   - Plural Label: Gantt Chart Configurations
+   - Object Name: Gantt_Chart_Configuration
+   - Record Name: Configuration Name
+   - Record Name Data Type: Text
+   - Allow Reports: Yes
+   - Allow Activities: No
+   - Track Field History: Optional
+   - Allow in Chatter Groups: No
+   - Allow Sharing: Yes
+   - Allow Bulk API Access: Yes
+   - Allow Streaming API Access: No
+   - Allow Search: Yes
+
+2. Add Custom Fields:
+   - Field Label: Configuration
+   - Field Name: Configuration
+   - API Name: Configuration__c
+   - Data Type: Long Text Area (131072)
+   - Visible Lines: 10
+   - Field-Level Security: Visible to all profiles
+   - Page Layout: Add to all layouts
+
+3. Set Object Permissions:
+   - Navigate to Setup → Profiles
+   - For each profile that needs access:
+     - Object Permissions:
+       - Read: Yes
+       - Create: Yes
+       - Edit: Yes
+       - Delete: Yes
+       - View All: No
+       - Modify All: No
+     - Field Permissions:
+       - Configuration__c: Visible and Read-Only
+
+### Component Structure
+
+The LWC bundle consists of four main files:
+
+1. **HTML Template** (ganttChart.html):
+   - Contains the component's markup
+   - Defines the UI structure
+   - Uses Lightning Design System classes
+   - Implements responsive layout
+
+2. **JavaScript Controller** (ganttChart.js):
+   - Handles component logic and lifecycle
+   - Manages data fetching and manipulation
+   - Implements event handlers
+   - Controls chart rendering and updates
+
+3. **CSS Styles** (ganttChart.css):
+   - Defines component-specific styles
+   - Sets up CSS variables for customization
+   - Handles responsive design
+   - Implements animations
+
+4. **Configuration** (ganttChart.js-meta.xml):
+   - Defines component metadata
+   - Specifies where component can be used
+   - Configures exposed properties
+   - Sets up target-specific configurations
+
 ### Manual Installation Steps
 
-1. Create the Custom Object:
-   - From Setup, go to Object Manager
-   - Create a new custom object named "Gantt Chart Configuration"
-   - API Name: Gantt_Chart_Configuration__c
-   - Add a long text field named "Configuration" (API: Configuration__c)
+1. Create the Custom Object as described above
 
 2. Create the Apex Controller:
    - From Setup, go to Developer Console
