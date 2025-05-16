@@ -1,0 +1,236 @@
+<template>
+    <div class="gantt-component slds-card">
+        <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                    <lightning-icon icon-name="standard:timeline" alternative-text="Gantt Chart" size="medium"></lightning-icon>
+                </div>
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <span class="slds-text-heading_medium">Gantt Chart</span>
+                    </h2>
+                </div>
+                <div class="slds-no-flex">
+                    <lightning-button-group>
+                        <lightning-button 
+                            label="Configure" 
+                            icon-name="utility:settings" 
+                            onclick={handleConfigurationToggle}>
+                        </lightning-button>
+                        <lightning-button-menu alternative-text="Show menu">
+                            <lightning-menu-item value="refresh" label="Refresh Data" onclick={loadRecords}></lightning-menu-item>
+                            <lightning-menu-item value="save" label="Save Configuration" onclick={handleSaveConfiguration}></lightning-menu-item>
+                            <lightning-menu-item value="export" label="Export as PNG"></lightning-menu-item>
+                        </lightning-button-menu>
+                    </lightning-button-group>
+                </div>
+            </header>
+        </div>
+        
+        <div class="slds-card__body slds-card__body_inner">
+            <!-- Configuration Panel -->
+            <div class="configuration-panel" if:true={showConfiguration}>
+                <div class="slds-box slds-theme_default slds-m-bottom_medium">
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                            <div class="slds-form-element slds-m-bottom_small">
+                                <lightning-combobox
+                                    label="Select Object"
+                                    placeholder="Select an object"
+                                    options={availableObjects}
+                                    value={selectedObject}
+                                    onchange={handleObjectChange}
+                                    required>
+                                </lightning-combobox>
+                            </div>
+                            
+                            <template if:true={objectFields.length}>
+                                <div class="slds-form-element slds-m-bottom_small">
+                                    <lightning-combobox
+                                        label="Start Date Field"
+                                        placeholder="Select start date field"
+                                        options={dateFields}
+                                        value={selectedStartDateField}
+                                        onchange={handleStartDateFieldChange}
+                                        required>
+                                    </lightning-combobox>
+                                </div>
+                                
+                                <div class="slds-form-element slds-m-bottom_small">
+                                    <lightning-combobox
+                                        label="End Date Field"
+                                        placeholder="Select end date field"
+                                        options={dateFields}
+                                        value={selectedEndDateField}
+                                        onchange={handleEndDateFieldChange}
+                                        required>
+                                    </lightning-combobox>
+                                </div>
+                                
+                                <div class="slds-form-element slds-m-bottom_small">
+                                    <lightning-combobox
+                                        label="Title Field"
+                                        placeholder="Select title field"
+                                        options={textFields}
+                                        value={selectedTitleField}
+                                        onchange={handleTitleFieldChange}
+                                        required>
+                                    </lightning-combobox>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                            <template if:true={objectFields.length}>
+                                <div class="slds-form-element slds-m-bottom_small">
+                                    <lightning-combobox
+                                        label="Color Field (Optional)"
+                                        placeholder="Field for color coding"
+                                        options={objectFields}
+                                        value={selectedColorField}
+                                        onchange={handleColorFieldChange}>
+                                    </lightning-combobox>
+                                </div>
+                                
+                                <div class="slds-form-element slds-m-bottom_small">
+                                    <lightning-dual-listbox
+                                        label="Additional Fields to Display"
+                                        source-label="Available Fields"
+                                        selected-label="Selected Fields"
+                                        options={objectFields}
+                                        value={additionalFields}
+                                        onchange={handleAdditionalFieldsChange}>
+                                    </lightning-dual-listbox>
+                                </div>
+                            </template>
+                            
+                            <template if:true={savedConfigurations.length}>
+                                <div class="slds-form-element slds-m-bottom_small">
+                                    <lightning-combobox
+                                        label="Load Saved Configuration"
+                                        placeholder="Select a saved configuration"
+                                        options={savedConfigurations}
+                                        onchange={handleLoadConfiguration}>
+                                    </lightning-combobox>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    
+                    <div class="slds-grid slds-grid_align-end slds-m-top_medium">
+                        <lightning-button 
+                            label="Apply" 
+                            variant="brand" 
+                            onclick={handleApplyConfiguration}
+                            disabled={isConfigurationInvalid}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Controls -->
+            <div class="gantt-controls slds-m-bottom_medium" if:true={showControls}>
+                <div class="slds-grid slds-gutters slds-grid_vertical-align-center">
+                    <div class="slds-col slds-size_1-of-2">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="slds-m-right_small">
+                                <lightning-button-icon 
+                                    icon-name="utility:chevronleft" 
+                                    alternative-text="Pan Left" 
+                                    title="Pan Left"
+                                    onclick={handlePanLeft}>
+                                </lightning-button-icon>
+                            </div>
+                            
+                            <lightning-button 
+                                label="Today" 
+                                onclick={handleTodayView}>
+                            </lightning-button>
+                            
+                            <div class="slds-m-left_small">
+                                <lightning-button-icon 
+                                    icon-name="utility:chevronright" 
+                                    alternative-text="Pan Right" 
+                                    title="Pan Right"
+                                    onclick={handlePanRight}>
+                                </lightning-button-icon>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slds-col slds-size_1-of-2 slds-grid slds-grid_align-end">
+                        <lightning-combobox
+                            label="Zoom"
+                            value={zoom}
+                            options={zoomOptions}
+                            onchange={handleZoomChange}>
+                        </lightning-combobox>
+                        
+                        <div class="slds-m-left_small">
+                            <lightning-input 
+                                type="date" 
+                                label="From" 
+                                value={startDate}
+                                onchange={handleStartDateChange}>
+                            </lightning-input>
+                        </div>
+                        
+                        <div class="slds-m-left_small">
+                            <lightning-input 
+                                type="date" 
+                                label="To" 
+                                value={endDate}
+                                onchange={handleEndDateChange}>
+                            </lightning-input>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chart Area -->
+            <div class="gantt-chart-wrapper">
+                <template if:true={isLoading}>
+                    <div class="slds-is-relative" style={spinnerHeight}>
+                        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                    </div>
+                </template>
+                
+                <template if:false={isLoading}>
+                    <template if:true={error}>
+                        <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
+                            <span class="slds-assistive-text">Error</span>
+                            <h2>{error}</h2>
+                        </div>
+                    </template>
+                    
+                    <template if:false={error}>
+                        <template if:true={records.length}>
+                            <div class="gantt-container" style={containerStyle}>
+                                <!-- Timeline header -->
+                                <div class="gantt-timeline-header">
+                                    <!-- Will be populated with timeline units -->
+                                </div>
+                                
+                                <!-- Gantt chart rows -->
+                                <div class="gantt-chart-container" style={chartContainerStyle}>
+                                    <!-- Will be populated with Gantt bars -->
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <template if:false={records.length}>
+                            <div class="slds-illustration slds-illustration_small" aria-hidden="true">
+                                <div class="slds-text-longform">
+                                    <h3 class="slds-text-heading_medium">No records to display</h3>
+                                    <p class="slds-text-body_regular">
+                                        Configure the chart or adjust the date range to see records.
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>
