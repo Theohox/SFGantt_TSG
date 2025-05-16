@@ -1,4 +1,4 @@
-.c-gantt-chart {
+:host {
     --gantt-row-height: 40px;
     --gantt-header-height: 50px;
     --gantt-label-width: 200px;
@@ -13,12 +13,12 @@
     --gantt-today-color: rgba(255, 0, 0, 0.1);
 }
 
-.c-gantt-chart .gantt-chart-wrapper {
+.gantt-chart-wrapper {
     position: relative;
     overflow: hidden;
 }
 
-.c-gantt-chart .gantt-container {
+.gantt-container {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -27,7 +27,7 @@
     border-radius: 0.25rem;
 }
 
-.c-gantt-chart .gantt-timeline-header {
+.gantt-timeline-header {
     height: var(--gantt-header-height);
     min-height: var(--gantt-header-height);
     background-color: #F3F2F2;
@@ -38,24 +38,24 @@
     display: flex;
 }
 
-.c-gantt-chart .gantt-chart-container {
+.gantt-chart-container {
     flex: 1;
     position: relative;
     overflow-y: auto;
 }
 
-.c-gantt-chart .gantt-row {
+.gantt-row {
     display: flex;
     height: var(--gantt-row-height);
     border-bottom: 1px solid var(--gantt-grid-color);
     position: relative;
 }
 
-.c-gantt-chart .gantt-row:hover {
+.gantt-row:hover {
     background-color: #F3F2F2;
 }
 
-.c-gantt-chart .gantt-label {
+.gantt-label {
     width: var(--gantt-label-width);
     min-width: var(--gantt-label-width);
     padding: 0 10px;
@@ -71,12 +71,12 @@
     white-space: nowrap;
 }
 
-.c-gantt-chart .gantt-bar-container {
+.gantt-bar-container {
     flex: 1;
     position: relative;
 }
 
-.c-gantt-chart .gantt-bar {
+.gantt-bar {
     position: absolute;
     height: 20px;
     margin-top: 10px;
@@ -95,12 +95,12 @@
     transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-.c-gantt-chart .gantt-bar:hover {
+.gantt-bar:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
 
-.c-gantt-chart .gantt-milestone {
+.gantt-milestone {
     height: 20px;
     width: 20px;
     margin-top: 10px;
@@ -109,7 +109,7 @@
     position: absolute;
 }
 
-.c-gantt-chart .gantt-today-line {
+.gantt-today-line {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -118,7 +118,7 @@
     z-index: 4;
 }
 
-.c-gantt-chart .gantt-timeline-unit {
+.gantt-timeline-unit {
     flex: 1;
     min-width: 50px;
     text-align: center;
@@ -130,11 +130,11 @@
     font-size: 12px;
 }
 
-.c-gantt-chart .gantt-timeline-unit.weekend {
+.gantt-timeline-unit.weekend {
     background-color: rgba(0, 0, 0, 0.03);
 }
 
-.c-gantt-chart .gantt-grid-column {
+.gantt-grid-column {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -143,7 +143,7 @@
     z-index: 3;
 }
 
-.c-gantt-chart .gantt-tooltip {
+.gantt-tooltip {
     position: absolute;
     background-color: #FFFFFF;
     border: 1px solid #DDDBDA;
@@ -155,12 +155,12 @@
     max-width: 300px;
 }
 
-.c-gantt-chart .configuration-panel {
+.configuration-panel {
     transition: max-height 0.3s ease;
     overflow: hidden;
 }
 
-.c-gantt-chart .gantt-controls {
+.gantt-controls {
     background-color: #FFFFFF;
     padding: 8px;
     border: 1px solid var(--gantt-grid-color);
@@ -168,7 +168,7 @@
 }
 
 @media (max-width: 768px) {
-    .c-gantt-chart {
+    :host {
         --gantt-label-width: 150px;
     }
 }
