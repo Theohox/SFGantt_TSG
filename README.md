@@ -96,3 +96,49 @@ The component can be further customized by modifying the CSS variables defined i
    - End Date: ClosedDate
    - Title: Subject
    - Color: Priority
+
+
+To manually add this component to your Salesforce org, follow these steps:
+
+Create the Custom Object:
+
+From Setup, go to Object Manager
+Create a new custom object named "Gantt Chart Configuration"
+Use the XML from GanttChartConfiguration__c.object-meta.xml
+Add the Configuration field using Configuration__c.field-meta.xml specifications
+Create the Apex Controller:
+
+From Setup, go to Developer Console
+Create a new Apex Class named "GanttChartController"
+Copy the content from GanttChartController.cls
+Save the class
+Create the LWC Component:
+
+From Setup, go to Developer Console
+Create a new Lightning Web Component named "ganttChart"
+Create these files in the component bundle:
+ganttChart.js (JavaScript controller)
+ganttChart.html (Template)
+ganttChart.css (Styles)
+ganttChart.js-meta.xml (Configuration)
+Copy the content from the respective files
+Deploy to Production:
+
+Test the component in a sandbox first
+Create a change set including:
+GanttChartConfiguration__c custom object
+Configuration__c custom field
+GanttChartController Apex class
+ganttChart LWC component bundle
+Deploy the change set to production
+Using the Component:
+
+Go to any Lightning page
+Edit the page in Lightning App Builder
+Drag the "Dynamic Gantt Chart" component onto the page
+Configure the component properties:
+Chart Height
+Show/Hide Filters
+Show/Hide Controls
+Default Zoom Level
+Save the page
