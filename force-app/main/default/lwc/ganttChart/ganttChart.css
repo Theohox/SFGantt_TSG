@@ -1,31 +1,27 @@
-.THIS {
-    display: block;
-}
-
-.THIS .gantt-container {
-    border: var(--lwc-borderWidthThin) solid var(--lwc-colorBorder);
+.gantt-container {
+    border: 1px solid var(--lwc-colorBorder);
     border-radius: var(--lwc-borderRadiusMedium);
     overflow: auto;
     position: relative;
 }
 
-.THIS .gantt-header {
+.gantt-header {
     display: flex;
     position: sticky;
     top: 0;
     background: var(--lwc-colorBackground);
-    border-bottom: var(--lwc-borderWidthThin) solid var(--lwc-colorBorder);
+    border-bottom: 1px solid var(--lwc-colorBorder);
     z-index: 2;
 }
 
-.THIS .gantt-header-cell {
+.gantt-header-cell {
     padding: var(--lwc-spacingSmall);
     text-align: center;
     min-width: 100px;
-    border-right: var(--lwc-borderWidthThin) solid var(--lwc-colorBorder);
+    border-right: 1px solid var(--lwc-colorBorder);
 }
 
-.THIS .gantt-side-col {
+.gantt-side-col {
     position: sticky;
     left: 0;
     background: var(--lwc-colorBackground);
@@ -33,22 +29,22 @@
     z-index: 1;
 }
 
-.THIS .gantt-row {
+.gantt-row {
     display: flex;
-    border-bottom: var(--lwc-borderWidthThin) solid var(--lwc-colorBorder);
+    border-bottom: 1px solid var(--lwc-colorBorder);
 }
 
-.THIS .gantt-row:hover {
+.gantt-row:hover {
     background-color: var(--lwc-colorBackgroundRowHover);
 }
 
-.THIS .gantt-timeline {
+.gantt-timeline {
     position: relative;
     flex: 1;
     height: 40px;
 }
 
-.THIS .gantt-bar {
+.gantt-bar {
     position: absolute;
     height: 24px;
     top: 8px;
@@ -65,7 +61,7 @@
     transition: transform 0.1s ease-in-out;
 }
 
-.THIS .gantt-bar:hover {
+.gantt-bar:hover {
     transform: translateY(-2px);
     box-shadow: var(--lwc-shadowDrag);
 }

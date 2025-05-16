@@ -1,11 +1,13 @@
 import { LightningElement, api, track } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
+
+// Import Apex methods
 import getObjects from '@salesforce/apex/GanttChartController.getObjects';
 import getObjectFields from '@salesforce/apex/GanttChartController.getObjectFields';
 import getRecords from '@salesforce/apex/GanttChartController.getRecords';
-import saveConfiguration from '@salesforce/apex/GanttChartController.saveConfiguration';
-import getConfiguration from '@salesforce/apex/GanttChartController.getConfiguration';
 
-export default class GanttChart extends LightningElement {
+export default class GanttChart extends NavigationMixin(LightningElement) {
     @api recordId;
     @api objectApiName;
     @api height = '500px';
@@ -14,385 +16,184 @@ export default class GanttChart extends LightningElement {
     @api defaultZoom = 'month';
     
     @track selectedObject;
-    @track availableObjects = [];
-    @track objectFields = [];
-    @track selectedStartDateField;
-    @track selectedEndDateField;
-    @track selectedTitleField;
-    @track selectedColorField;
-    @track additionalFields = [];
-    @track records = [];
+    @track dateFields = [];
+    @track textFields = [];
+    @track startDateField;
+    @track endDateField;
+    @track labelField;
+    @track isLoading = false;
     @track error;
-    @track isLoading = true;
+    @track tasks = [];
     @track zoom = 'month';
-    @track startDate;
-    @track endDate;
-    @track viewStartDate;
-    @track viewEndDate;
-    @track configuration = {};
-    @track showConfiguration = false;
-    @track savedConfigurations = [];
+    @track timeSlots = [];
     
+    objectOptions = [];
     zoomOptions = [
         { label: 'Day', value: 'day' },
         { label: 'Week', value: 'week' },
-        { label: 'Month', value: 'month' },
-        { label: 'Quarter', value: 'quarter' },
-        { label: 'Year', value: 'year' }
+        { label: 'Month', value: 'month' }
     ];
     
     connectedCallback() {
         this.zoom = this.defaultZoom;
-        this.loadAvailableObjects();
-        this.loadSavedConfigurations();
-        
-        const today = new Date();
-        this.startDate = today.toISOString().split('T')[0];
-        
-        const futureDate = new Date();
-        futureDate.setDate(today.getDate() + 30);
-        this.endDate = futureDate.toISOString().split('T')[0];
-        
-        this.viewStartDate = this.startDate;
-        this.viewEndDate = this.endDate;
+        this.loadObjects();
     }
     
-    loadAvailableObjects() {
+    loadObjects() {
         this.isLoading = true;
         getObjects()
             .then(result => {
-                this.availableObjects = result.map(obj => ({
+                this.objectOptions = result.map(obj => ({
                     label: obj.label,
                     value: obj.apiName
                 }));
                 this.isLoading = false;
             })
             .catch(error => {
-                this.error = this.reduceError(error);
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Error',
-                        message: this.error,
-                        variant: 'error'
-                    })
-                );
-                this.isLoading = false;
-            });
-    }
-    
-    loadSavedConfigurations() {
-        getConfiguration()
-            .then(result => {
-                this.savedConfigurations = result;
-            })
-            .catch(error => {
-                this.error = this.reduceError(error);
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Error',
-                        message: this.error,
-                        variant: 'error'
-                    })
-                );
+                this.handleError(error);
             });
     }
     
     handleObjectChange(event) {
         this.selectedObject = event.detail.value;
-        this.loadObjectFields();
+        this.loadFields();
     }
     
-    loadObjectFields() {
+    loadFields() {
+        if (!this.selectedObject) return;
+        
         this.isLoading = true;
         getObjectFields({ objectApiName: this.selectedObject })
             .then(result => {
-                this.objectFields = result.map(field => ({
-                    label: field.label,
-                    value: field.apiName,
-                    dataType: field.dataType
-                }));
+                this.dateFields = result
+                    .filter(field => field.dataType === 'Date' || field.dataType === 'DateTime')
+                    .map(field => ({
+                        label: field.label,
+                        value: field.apiName
+                    }));
                 
-                this.dateFields = this.objectFields.filter(field => 
-                    field.dataType === 'Date' || field.dataType === 'DateTime'
-                );
-                
-                this.textFields = this.objectFields.filter(field => 
-                    field.dataType === 'String' || field.dataType === 'Text' || 
-                    field.dataType === 'Picklist' || field.dataType === 'Reference'
-                );
+                this.textFields = result
+                    .filter(field => field.dataType === 'String' || field.dataType === 'Text')
+                    .map(field => ({
+                        label: field.label,
+                        value: field.apiName
+                    }));
                 
                 this.isLoading = false;
             })
             .catch(error => {
-                this.error = this.reduceError(error);
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Error',
-                        message: this.error,
-                        variant: 'error'
-                    })
-                );
-                this.isLoading = false;
+                this.handleError(error);
             });
     }
     
-    handleStartDateFieldChange(event) {
-        this.selectedStartDateField = event.detail.value;
+    handleStartFieldChange(event) {
+        this.startDateField = event.detail.value;
+        this.loadRecords();
     }
     
-    handleEndDateFieldChange(event) {
-        this.selectedEndDateField = event.detail.value;
+    handleEndFieldChange(event) {
+        this.endDateField = event.detail.value;
+        this.loadRecords();
     }
     
-    handleTitleFieldChange(event) {
-        this.selectedTitleField = event.detail.value;
-    }
-    
-    handleColorFieldChange(event) {
-        this.selectedColorField = event.detail.value;
-    }
-    
-    handleAdditionalFieldsChange(event) {
-        this.additionalFields = event.detail.value;
-    }
-    
-    get isConfigurationInvalid() {
-        return !(this.selectedObject && this.selectedStartDateField && 
-                this.selectedEndDateField && this.selectedTitleField);
-    }
-    
-    handleApplyConfiguration() {
-        if (!this.isConfigurationInvalid) {
-            this.loadRecords();
-            this.showConfiguration = false;
-        } else {
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Error',
-                    message: 'Please select all required fields',
-                    variant: 'error'
-                })
-            );
-        }
-    }
-    
-    handleSaveConfiguration() {
-        if (!this.isConfigurationInvalid) {
-            const config = {
-                objectApiName: this.selectedObject,
-                startDateField: this.selectedStartDateField,
-                endDateField: this.selectedEndDateField,
-                titleField: this.selectedTitleField,
-                colorField: this.selectedColorField,
-                additionalFields: this.additionalFields
-            };
-            
-            saveConfiguration({ configStr: JSON.stringify(config) })
-                .then(() => {
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Success',
-                            message: 'Configuration saved successfully',
-                            variant: 'success'
-                        })
-                    );
-                    this.loadSavedConfigurations();
-                })
-                .catch(error => {
-                    this.error = this.reduceError(error);
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Error',
-                            message: this.error,
-                            variant: 'error'
-                        })
-                    );
-                });
-        }
+    handleLabelFieldChange(event) {
+        this.labelField = event.detail.value;
+        this.loadRecords();
     }
     
     loadRecords() {
-        if (this.isConfigurationInvalid) {
-            return;
-        }
+        if (!this.canLoadRecords) return;
         
         this.isLoading = true;
-        const fields = [
-            this.selectedStartDateField,
-            this.selectedEndDateField,
-            this.selectedTitleField,
-            ...(this.selectedColorField ? [this.selectedColorField] : []),
-            ...this.additionalFields
-        ];
-        
         getRecords({
             objectApiName: this.selectedObject,
-            fields: fields,
-            startDateField: this.selectedStartDateField,
-            endDateField: this.selectedEndDateField,
-            startDate: this.startDate,
-            endDate: this.endDate
+            startDateField: this.startDateField,
+            endDateField: this.endDateField,
+            labelField: this.labelField
         })
-        .then(result => {
-            this.records = this.processRecords(result);
-            this.error = undefined;
-            this.isLoading = false;
-        })
-        .catch(error => {
-            this.error = this.reduceError(error);
-            this.records = [];
-            this.isLoading = false;
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Error',
-                    message: this.error,
-                    variant: 'error'
-                })
-            );
-        });
+            .then(result => {
+                this.tasks = this.processTasks(result);
+                this.generateTimeSlots();
+                this.isLoading = false;
+            })
+            .catch(error => {
+                this.handleError(error);
+            });
     }
     
-    processRecords(records) {
-        return records.map(record => {
-            const startDate = new Date(record[this.selectedStartDateField]);
-            const endDate = new Date(record[this.selectedEndDateField]);
-            const duration = this.calculateDuration(startDate, endDate);
-            const position = this.calculatePosition(startDate);
-            
-            return {
-                id: record.Id,
-                title: record[this.selectedTitleField],
-                start: startDate,
-                end: endDate,
-                style: `left: ${position}%; width: ${duration}%;`,
-                color: this.selectedColorField ? record[this.selectedColorField] : null,
-                record: record
-            };
-        });
+    get canLoadRecords() {
+        return this.selectedObject && this.startDateField && 
+               this.endDateField && this.labelField;
     }
     
-    calculateDuration(start, end) {
-        const totalDays = (this.viewEndDate - this.viewStartDate) / (1000 * 60 * 60 * 24);
-        const recordDays = (end - start) / (1000 * 60 * 60 * 24);
-        return (recordDays / totalDays) * 100;
+    processTasks(records) {
+        return records.map(record => ({
+            id: record.Id,
+            label: record[this.labelField],
+            start: record[this.startDateField],
+            end: record[this.endDateField],
+            style: this.calculateTaskStyle(record)
+        }));
     }
     
-    calculatePosition(date) {
-        const totalDays = (this.viewEndDate - this.viewStartDate) / (1000 * 60 * 60 * 24);
-        const daysSinceStart = (date - this.viewStartDate) / (1000 * 60 * 60 * 24);
-        return (daysSinceStart / totalDays) * 100;
+    calculateTaskStyle(record) {
+        const start = new Date(record[this.startDateField]);
+        const end = new Date(record[this.endDateField]);
+        // Calculate position and width based on dates
+        return `left: 20%; width: 60%;`; // Example values
     }
     
-    handleConfigurationToggle() {
-        this.showConfiguration = !this.showConfiguration;
+    generateTimeSlots() {
+        // Generate time slots based on zoom level
+        this.timeSlots = []; // Implementation needed
     }
     
     handleZoomChange(event) {
         this.zoom = event.detail.value;
-        this.updateViewDates();
+        this.generateTimeSlots();
     }
     
-    handleStartDateChange(event) {
-        this.startDate = event.detail.value;
-        this.loadRecords();
+    handlePrevious() {
+        // Handle previous time period
     }
     
-    handleEndDateChange(event) {
-        this.endDate = event.detail.value;
-        this.loadRecords();
+    handleNext() {
+        // Handle next time period
     }
     
-    handlePanLeft() {
-        const days = this.getPanDays();
-        this.viewStartDate.setDate(this.viewStartDate.getDate() - days);
-        this.viewEndDate.setDate(this.viewEndDate.getDate() - days);
-        this.loadRecords();
+    handleToday() {
+        // Reset to today's view
     }
     
-    handlePanRight() {
-        const days = this.getPanDays();
-        this.viewStartDate.setDate(this.viewStartDate.getDate() + days);
-        this.viewEndDate.setDate(this.viewEndDate.getDate() + days);
-        this.loadRecords();
+    handleTaskClick(event) {
+        const recordId = event.currentTarget.dataset.id;
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: recordId,
+                objectApiName: this.selectedObject,
+                actionName: 'view'
+            }
+        });
     }
     
-    handleTodayView() {
-        const today = new Date();
-        this.viewStartDate = this.calculateViewStartDate(today);
-        this.viewEndDate = this.calculateViewEndDate(today);
-        this.loadRecords();
+    handleError(error) {
+        this.error = error.body?.message || error.message || 'Unknown error';
+        this.isLoading = false;
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Error',
+                message: this.error,
+                variant: 'error'
+            })
+        );
     }
     
-    getPanDays() {
-        switch (this.zoom) {
-            case 'day': return 1;
-            case 'week': return 7;
-            case 'month': return 30;
-            case 'quarter': return 90;
-            case 'year': return 365;
-            default: return 30;
-        }
-    }
-    
-    calculateViewStartDate(date) {
-        const startDate = new Date(date);
-        switch (this.zoom) {
-            case 'day':
-                startDate.setHours(0, 0, 0, 0);
-                break;
-            case 'week':
-                startDate.setDate(startDate.getDate() - startDate.getDay());
-                break;
-            case 'month':
-                startDate.setDate(1);
-                break;
-            case 'quarter':
-                startDate.setMonth(Math.floor(startDate.getMonth() / 3) * 3);
-                startDate.setDate(1);
-                break;
-            case 'year':
-                startDate.setMonth(0, 1);
-                break;
-        }
-        return startDate;
-    }
-    
-    calculateViewEndDate(date) {
-        const endDate = this.calculateViewStartDate(date);
-        switch (this.zoom) {
-            case 'day':
-                endDate.setDate(endDate.getDate() + 1);
-                break;
-            case 'week':
-                endDate.setDate(endDate.getDate() + 7);
-                break;
-            case 'month':
-                endDate.setMonth(endDate.getMonth() + 1);
-                break;
-            case 'quarter':
-                endDate.setMonth(endDate.getMonth() + 3);
-                break;
-            case 'year':
-                endDate.setFullYear(endDate.getFullYear() + 1);
-                break;
-        }
-        return endDate;
-    }
-    
-    get chartStyle() {
+    get containerStyle() {
         return `height: ${this.height};`;
     }
     
-    reduceError(error) {
-        if (typeof error === 'string') {
-            return error;
-        }
-        if (Array.isArray(error.body)) {
-            return error.body.map(e => e.message).join(', ');
-        }
-        if (typeof error.body?.message === 'string') {
-            return error.body.message;
-        }
-        return 'Unknown error';
+    get hasObjectSelected() {
+        return !!this.selectedObject;
     }
 }
