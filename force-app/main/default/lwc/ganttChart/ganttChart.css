@@ -1,18 +1,15 @@
-/* Host container styles */
-:host {
+.THIS {
     display: block;
 }
 
-/* Gantt container */
-.gantt-container {
+.THIS .gantt-container {
     border: var(--lwc-borderWidthThin) solid var(--lwc-colorBorder);
     border-radius: var(--lwc-borderRadiusMedium);
     overflow: auto;
     position: relative;
 }
 
-/* Header styles */
-.gantt-header {
+.THIS .gantt-header {
     display: flex;
     position: sticky;
     top: 0;
@@ -21,15 +18,14 @@
     z-index: 2;
 }
 
-.gantt-header-cell {
+.THIS .gantt-header-cell {
     padding: var(--lwc-spacingSmall);
     text-align: center;
     min-width: 100px;
     border-right: var(--lwc-borderWidthThin) solid var(--lwc-colorBorder);
 }
 
-/* Side column */
-.gantt-side-col {
+.THIS .gantt-side-col {
     position: sticky;
     left: 0;
     background: var(--lwc-colorBackground);
@@ -37,25 +33,22 @@
     z-index: 1;
 }
 
-/* Row styles */
-.gantt-row {
+.THIS .gantt-row {
     display: flex;
     border-bottom: var(--lwc-borderWidthThin) solid var(--lwc-colorBorder);
 }
 
-.gantt-row:hover {
+.THIS .gantt-row:hover {
     background-color: var(--lwc-colorBackgroundRowHover);
 }
 
-/* Timeline */
-.gantt-timeline {
+.THIS .gantt-timeline {
     position: relative;
     flex: 1;
     height: 40px;
 }
 
-/* Task bar */
-.gantt-bar {
+.THIS .gantt-bar {
     position: absolute;
     height: 24px;
     top: 8px;
@@ -72,7 +65,7 @@
     transition: transform 0.1s ease-in-out;
 }
 
-.gantt-bar:hover {
+.THIS .gantt-bar:hover {
     transform: translateY(-2px);
     box-shadow: var(--lwc-shadowDrag);
 }
