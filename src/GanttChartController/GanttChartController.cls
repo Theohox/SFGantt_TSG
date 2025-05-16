@@ -146,16 +146,13 @@ public with sharing class GanttChartController {
     @AuraEnabled
     public static String saveConfiguration(String configStr) {
         try {
-            List<Gantt_Chart_Configuration__c> configsToInsert = new List<Gantt_Chart_Configuration__c>();
-            
-            Gantt_Chart_Configuration__c config = new Gantt_Chart_Configuration__c(
+            GanttChartConfiguration__c config = new GanttChartConfiguration__c(
                 Name = 'Gantt Configuration',
                 Configuration__c = configStr,
                 OwnerId = UserInfo.getUserId()
             );
             
-            configsToInsert.add(config);
-            insert configsToInsert;
+            insert config;
             return config.Id;
         } 
         catch (Exception e) {
@@ -168,14 +165,12 @@ public with sharing class GanttChartController {
         try {
             List<ConfigInfo> configs = new List<ConfigInfo>();
             
-            List<Gantt_Chart_Configuration__c> savedConfigs = [
+            for (GanttChartConfiguration__c config : [
                 SELECT Id, Name, Configuration__c, CreatedDate
-                FROM Gantt_Chart_Configuration__c
+                FROM GanttChartConfiguration__c
                 WHERE OwnerId = :UserInfo.getUserId()
                 ORDER BY CreatedDate DESC
-            ];
-            
-            for (Gantt_Chart_Configuration__c config : savedConfigs) {
+            ]) {
                 configs.add(new ConfigInfo(
                     config.Id,
                     config.Name,
