@@ -12,69 +12,95 @@ A flexible Lightning Web Component (LWC) for Salesforce that displays Gantt char
 - Save and load configurations for different use cases
 - Responsive design that works on all devices
 - Quick access to record details
+- Context-aware object selection based on record relationships
+- Support for multiple component targets (App Pages, Record Pages, Flow Screens, etc.)
+- Automatic date field type detection and filtering
+
+## Component Availability
+
+The component can be used in various Salesforce contexts:
+
+- Lightning App Pages
+- Lightning Record Pages
+- Lightning Home Pages
+- Lightning Tabs
+- Lightning Utility Bar
+- Lightning Flow Screens
+- Lightning Quick Actions
+- Lightning Communities/Experience Pages
 
 ## Installation
-
-Deploy the component to your Salesforce org using Salesforce DX or the Metadata API.
 
 ### Prerequisites
 
 - Salesforce org with Lightning Experience enabled
 - API version 59.0 or later
 
-### Deployment
+### Manual Installation Steps
 
-1. Deploy the Lightning Web Component files:
-   - `GanttChart.js`
-   - `GanttChart.html`
-   - `GanttChart.css`
-   - `GanttChart.js-meta.xml`
+1. Create the Custom Object:
+   - From Setup, go to Object Manager
+   - Create a new custom object named "Gantt Chart Configuration"
+   - API Name: Gantt_Chart_Configuration__c
+   - Add a long text field named "Configuration" (API: Configuration__c)
 
-2. Deploy the Apex controller:
-   - `GanttChartController.cls`
+2. Create the Apex Controller:
+   - From Setup, go to Developer Console
+   - Create a new Apex Class named "GanttChartController"
+   - Copy the content from GanttChartController.cls
+   - Save the class
 
-3. Deploy the custom object for storing configurations:
-   - `GanttChartConfiguration__c.object-meta.xml`
-   - `Configuration__c.field-meta.xml`
+3. Create the LWC Component:
+   - From Setup, go to Developer Console
+   - Create a new Lightning Web Component named "ganttChart"
+   - Create the following files:
+     - ganttChart.js (JavaScript controller)
+     - ganttChart.html (Template)
+     - ganttChart.css (Styles)
+     - ganttChart.js-meta.xml (Configuration)
 
-## Usage
-
-1. Add the component to any Lightning page using the Lightning App Builder
-2. Configure the component properties:
-   - Chart Height
-   - Show/Hide Filters
-   - Show/Hide Controls
-   - Default Zoom Level
-
-3. When the component loads:
-   - Click "Configure" to set up the Gantt chart
-   - Select an object and required fields
-   - Click "Apply" to load the data
+4. Deploy to Production:
+   - Test in a sandbox environment first
+   - Create a change set including:
+     - Gantt_Chart_Configuration__c custom object
+     - Configuration__c custom field
+     - GanttChartController Apex class
+     - ganttChart LWC component bundle
+   - Deploy the change set to production
 
 ## Configuration Options
 
-The component can be customized with the following settings:
+### Component Properties
+
+- **Chart Height**: Set the height of the Gantt chart (default: 500px)
+- **Show Filters**: Toggle filter controls visibility (default: true)
+- **Show Controls**: Toggle navigation controls visibility (default: true)
+- **Default Zoom Level**: Set initial zoom level (default: month)
+  - Options: day, week, month, quarter, year
+
+### Object and Field Selection
 
 - **Object Selection**: Choose any standard or custom object
 - **Required Fields**:
-  - Start Date Field: Date/DateTime field for the start of each Gantt bar
-  - End Date Field: Date/DateTime field for the end of each Gantt bar
+  - Start Date Field: Date field for the start of each Gantt bar
+  - End Date Field: Date field for the end of each Gantt bar
   - Title Field: Text field to display on each Gantt bar
 - **Optional Fields**:
   - Color Field: Field to determine Gantt bar color
   - Additional Fields: Fields to display in the tooltip
 
-## Customization
+### Flow Screen Configuration
 
-The component can be further customized by modifying the CSS variables defined in `GanttChart.css`.
+When used in Flow Screens, additional properties are available:
+- Input Parameters:
+  - Selected Object
+  - Start Date Field
+  - End Date Field
+  - Title Field
+- Output Parameters:
+  - Selected Records (array of record IDs)
 
-## Best Practices
-
-- Use indexed date fields for better performance
-- Limit the date range to reasonable periods for better loading times
-- For large datasets, add additional filters in a customized version of the Apex controller
-
-## Example Use Cases
+## Usage Examples
 
 1. **Project Management**:
    - Object: Project__c
@@ -97,48 +123,39 @@ The component can be further customized by modifying the CSS variables defined i
    - Title: Subject
    - Color: Priority
 
+## Best Practices
 
-To manually add this component to your Salesforce org, follow these steps:
+- Use indexed date fields for better performance
+- Limit the date range to reasonable periods
+- Consider record visibility and sharing rules
+- Test with various screen sizes for responsive behavior
+- Validate field selections before saving configurations
 
-Create the Custom Object:
+## Security Considerations
 
-From Setup, go to Object Manager
-Create a new custom object named "Gantt Chart Configuration"
-Use the XML from GanttChartConfiguration__c.object-meta.xml
-Add the Configuration field using Configuration__c.field-meta.xml specifications
-Create the Apex Controller:
+- Component respects Salesforce object and field-level security
+- Queries are limited to 1000 records for performance
+- All database operations use sharing rules
+- Configuration storage is user-specific
 
-From Setup, go to Developer Console
-Create a new Apex Class named "GanttChartController"
-Copy the content from GanttChartController.cls
-Save the class
-Create the LWC Component:
+## Customization
 
-From Setup, go to Developer Console
-Create a new Lightning Web Component named "ganttChart"
-Create these files in the component bundle:
-ganttChart.js (JavaScript controller)
-ganttChart.html (Template)
-ganttChart.css (Styles)
-ganttChart.js-meta.xml (Configuration)
-Copy the content from the respective files
-Deploy to Production:
+The component can be styled using custom CSS variables defined in ganttChart.css:
 
-Test the component in a sandbox first
-Create a change set including:
-GanttChartConfiguration__c custom object
-Configuration__c custom field
-GanttChartController Apex class
-ganttChart LWC component bundle
-Deploy the change set to production
-Using the Component:
+```css
+--gantt-row-height
+--gantt-header-height
+--gantt-label-width
+--gantt-primary-color
+--gantt-grid-color
+--gantt-bar-color
+--gantt-bar-text
+```
 
-Go to any Lightning page
-Edit the page in Lightning App Builder
-Drag the "Dynamic Gantt Chart" component onto the page
-Configure the component properties:
-Chart Height
-Show/Hide Filters
-Show/Hide Controls
-Default Zoom Level
-Save the page
+## Troubleshooting
+
+Common issues and solutions:
+- No records showing: Check date range and field selections
+- Performance issues: Reduce date range or add filters
+- Display problems: Adjust chart height and zoom level
+- Loading errors: Verify field accessibility and permissions
