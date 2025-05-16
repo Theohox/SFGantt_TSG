@@ -2,7 +2,6 @@ import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 
-// Import Apex methods
 import getObjects from '@salesforce/apex/GanttChartController.getObjects';
 import getObjectFields from '@salesforce/apex/GanttChartController.getObjectFields';
 import getRecords from '@salesforce/apex/GanttChartController.getRecords';
@@ -11,9 +10,10 @@ export default class GanttChart extends NavigationMixin(LightningElement) {
     @api recordId;
     @api objectApiName;
     @api height = '500px';
-    @api showFilters = false;   // Fixed: must be false by default
-    @api showControls = false;  // Fixed: must be false by default
+    @api showFilters = true;
+    @api showControls = true;
     @api defaultZoom = 'month';
+    @api parentField;
     
     @track selectedObject;
     @track dateFields = [];
@@ -35,11 +35,14 @@ export default class GanttChart extends NavigationMixin(LightningElement) {
     ];
     
     connectedCallback() {
-        // If you want to default to true, set here:
-        // this.showFilters = true;
-        // this.showControls = true;
         this.zoom = this.defaultZoom;
         this.loadObjects();
+        
+        // If parent field is specified, pre-select object and load fields
+        if (this.parentField) {
+            this.selectedObject = this.objectApiName;
+            this.loadFields();
+        }
     }
     
     loadObjects() {
@@ -68,15 +71,25 @@ export default class GanttChart extends NavigationMixin(LightningElement) {
         this.isLoading = true;
         getObjectFields({ objectApiName: this.selectedObject })
             .then(result => {
+                // Filter date fields
                 this.dateFields = result
-                    .filter(field => field.dataType === 'Date' || field.dataType === 'DateTime')
+                    .filter(field => 
+                        field.dataType === 'DATE' || 
+                        field.dataType === 'DATETIME'
+                    )
                     .map(field => ({
                         label: field.label,
                         value: field.apiName
                     }));
                 
+                // Filter text fields
                 this.textFields = result
-                    .filter(field => field.dataType === 'String' || field.dataType === 'Text')
+                    .filter(field => 
+                        field.dataType === 'STRING' || 
+                        field.dataType === 'TEXT' ||
+                        field.dataType === 'PICKLIST' ||
+                        field.dataType === 'REFERENCE'
+                    )
                     .map(field => ({
                         label: field.label,
                         value: field.apiName
@@ -112,7 +125,8 @@ export default class GanttChart extends NavigationMixin(LightningElement) {
             objectApiName: this.selectedObject,
             startDateField: this.startDateField,
             endDateField: this.endDateField,
-            labelField: this.labelField
+            labelField: this.labelField,
+            parentField: this.parentField
         })
             .then(result => {
                 this.tasks = this.processTasks(result);

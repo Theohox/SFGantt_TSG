@@ -8,7 +8,17 @@ public with sharing class GanttChartController {
         for (String objName : globalDescribe.keySet()) {
             Schema.DescribeSObjectResult objDescribe = globalDescribe.get(objName).getDescribe();
             
-            if (objDescribe.isAccessible() && objDescribe.isQueryable()) {
+            // Only show objects that have at least one date field
+            Boolean hasDateField = false;
+            for (Schema.SObjectField field : objDescribe.fields.getMap().values()) {
+                Schema.DisplayType fieldType = field.getDescribe().getType();
+                if (fieldType == Schema.DisplayType.DATE || fieldType == Schema.DisplayType.DATETIME) {
+                    hasDateField = true;
+                    break;
+                }
+            }
+            
+            if (objDescribe.isAccessible() && objDescribe.isQueryable() && hasDateField) {
                 objects.add(new ObjectInfo(
                     objDescribe.getLabel(),
                     objDescribe.getName()
@@ -35,10 +45,14 @@ public with sharing class GanttChartController {
                 Schema.DescribeFieldResult fieldDescribe = fieldMap.get(fieldName).getDescribe();
                 
                 if (fieldDescribe.isAccessible()) {
+                    Schema.DisplayType fieldType = fieldDescribe.getType();
+                    String dataType = String.valueOf(fieldType);
+                    
+                    // Include all accessible fields
                     fields.add(new FieldInfo(
                         fieldDescribe.getLabel(),
                         fieldDescribe.getName(),
-                        String.valueOf(fieldDescribe.getType())
+                        dataType
                     ));
                 }
             }
@@ -56,16 +70,28 @@ public with sharing class GanttChartController {
         String objectApiName,
         String startDateField,
         String endDateField,
-        String labelField
+        String labelField,
+        String parentField
     ) {
         try {
             String query = 'SELECT Id, ' + 
                           String.escapeSingleQuotes(startDateField) + ', ' +
                           String.escapeSingleQuotes(endDateField) + ', ' +
-                          String.escapeSingleQuotes(labelField) +
-                          ' FROM ' + String.escapeSingleQuotes(objectApiName) +
-                          ' ORDER BY ' + String.escapeSingleQuotes(startDateField) +
-                          ' LIMIT 1000';
+                          String.escapeSingleQuotes(labelField);
+            
+            // Add parent field if specified
+            if (String.isNotBlank(parentField)) {
+                query += ', ' + String.escapeSingleQuotes(parentField);
+            }
+            
+            query += ' FROM ' + String.escapeSingleQuotes(objectApiName);
+            
+            // Add parent filter if specified
+            if (String.isNotBlank(parentField)) {
+                query += ' WHERE ' + String.escapeSingleQuotes(parentField) + ' != null';
+            }
+            
+            query += ' ORDER BY ' + String.escapeSingleQuotes(startDateField) + ' LIMIT 1000';
             
             return Database.query(query);
         } 
