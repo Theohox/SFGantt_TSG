@@ -1,6 +1,7 @@
 <template>
     <div class="c-gantt-chart">
         <div class="slds-card">
+            <!-- Header -->
             <div class="slds-card__header slds-grid">
                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                     <div class="slds-media__figure">
@@ -27,7 +28,9 @@
                 </header>
             </div>
             
+            <!-- Body -->
             <div class="slds-card__body slds-card__body_inner">
+                <!-- Configuration Panel -->
                 <template if:true={showConfiguration}>
                     <div class="configuration-panel">
                         <div class="slds-box slds-theme_default slds-m-bottom_medium">
@@ -110,6 +113,7 @@
                     </div>
                 </template>
                 
+                <!-- Controls -->
                 <template if:true={showControls}>
                     <div class="gantt-controls slds-m-bottom_medium">
                         <lightning-layout>
@@ -176,6 +180,7 @@
                     </div>
                 </template>
                 
+                <!-- Chart -->
                 <div class="gantt-chart-wrapper" style={chartStyle}>
                     <template if:true={isLoading}>
                         <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
