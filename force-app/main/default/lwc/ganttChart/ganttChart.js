@@ -11,8 +11,8 @@ export default class GanttChart extends NavigationMixin(LightningElement) {
     @api recordId;
     @api objectApiName;
     @api height = '500px';
-    @api showFilters = true;
-    @api showControls = true;
+    @api showFilters = false;   // Fixed: must be false by default
+    @api showControls = false;  // Fixed: must be false by default
     @api defaultZoom = 'month';
     
     @track selectedObject;
@@ -35,6 +35,9 @@ export default class GanttChart extends NavigationMixin(LightningElement) {
     ];
     
     connectedCallback() {
+        // If you want to default to true, set here:
+        // this.showFilters = true;
+        // this.showControls = true;
         this.zoom = this.defaultZoom;
         this.loadObjects();
     }

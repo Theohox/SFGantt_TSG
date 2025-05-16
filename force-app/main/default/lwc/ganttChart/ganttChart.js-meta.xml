@@ -12,13 +12,7 @@
     <targetConfigs>
         <targetConfig targets="lightning__AppPage,lightning__RecordPage,lightning__HomePage">
             <property name="height" type="String" default="500px" label="Chart Height"/>
-            <property name="defaultZoom" type="String" default="month" label="Default Zoom">
-                <restrictedTo>
-                    <value>day</value>
-                    <value>week</value>
-                    <value>month</value>
-                </restrictedTo>
-            </property>
+            <property name="defaultZoom" type="String" default="month" label="Default Zoom"/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
