@@ -1,4 +1,4 @@
-# Salesforce Dynamic Gantt Chart LWC
+# Salesforce Dynamic Gantt Chart LWC - IN DEVELOPMENT
 
 A flexible Lightning Web Component (LWC) for Salesforce that displays Gantt charts for any standard or custom object with date fields. This component allows users to customize which objects and fields are displayed in the Gantt chart.
 
